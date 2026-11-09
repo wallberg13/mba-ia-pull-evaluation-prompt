@@ -38,6 +38,7 @@ DICAS DE IMPLEMENTAÇÃO:
 
 import os
 import sys
+from pathlib import Path
 from dotenv import load_dotenv
 from langsmith import Client
 from langchain_core.prompts import ChatPromptTemplate
@@ -45,6 +46,16 @@ from utils import load_yaml, check_env_vars, print_section_header
 
 load_dotenv()
 
+PROMPT_PATH = f"{Path(__file__).parent.parent}/prompts/bug_to_user_story_v2.yml"
+REQUIRED_ENV_VARS = ['LANGSMITH_API_KEY', 'USERNAME_LANGSMITH_HUB', 'OPENAI_API_KEY', 'LLM_PROVIDER', 'LLM_MODEL', 'EVAL_MODEL']
+
+# Check .envs
+def check_envs():
+    print_section_header("Verificando .envs obrigatórias")
+    if not check_env_vars(REQUIRED_ENV_VARS):
+        print("Erro: Variáveis de ambiente faltando")
+        sys.exit(1)
+    print("Variáveis de ambiente verificadas com sucesso")
 
 def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
     """
@@ -70,12 +81,31 @@ def validate_prompt(prompt_data: dict) -> tuple[bool, list]:
     Returns:
         (is_valid, errors) - Tupla com status e lista de erros
     """
-    ...
 
 
 def main():
     """Função principal"""
-    ...
+    print_section_header("Pushing prompts to LangSmith")
+
+    """Check .envs"""
+    check_envs()
+
+    """Push prompts to LangSmith"""
+    prompt_data = load_yaml(PROMPT_PATH)
+    print(prompt_data)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", prompt_data["system_prompt"]),
+        ("user", prompt_data["user_prompt"]),
+    ])
+    client = Client()
+    url = client.push_prompt(
+        "wallbergmorais/bug_to_user_story_v2",
+        object=prompt,
+        is_public=True,
+        description="Prompt para converter relatos de bugs em User Stories",
+        tags=["v1.0.0", "model: gpt-4o-mini"],
+    )
+    print(url)
 
 
 if __name__ == "__main__":
