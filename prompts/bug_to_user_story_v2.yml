@@ -80,3 +80,4 @@ version: 1.0.0
 techniques_applied:
   - Few-shot
   - Chain of Thought
+  - Role Prompting
