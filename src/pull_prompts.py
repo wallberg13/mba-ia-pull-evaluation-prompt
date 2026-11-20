@@ -39,19 +39,41 @@ from langchain_core.prompts import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 )
-
-# Ajuste para o yaml sair montando bonitinho.
 import yaml
-def str_representer(dumper, data):
-    if "\n" in data:
-        return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
-    return dumper.represent_scalar("tag:yaml.org,2002:str", data)
-yaml.add_representer(str, str_representer)
 
 load_dotenv()
 
+
+def _as_literal_block(text: str) -> str:
+    """Prepara o texto para o estilo literal do YAML (`|`).
+
+    O PyYAML ignora o estilo `|` e volta para a string escapada (`\\n`)
+    quando encontra tab ou espaço colado na quebra de linha.
+    """
+    text = text.replace("\t", "    ")
+    return "\n".join(line.rstrip(" ") for line in text.split("\n"))
+
+
+def _represent_str(dumper, data):
+    if "\n" in data:
+        return dumper.represent_scalar(
+            "tag:yaml.org,2002:str",
+            _as_literal_block(data),
+            style="|",
+        )
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data)
+
+
+def _increase_indent(self, flow=False, indentless=False):
+    return yaml.emitter.Emitter.increase_indent(self, flow, False)
+
+
+# save_yaml usa yaml.dump, que grava com este Dumper.
+yaml.add_representer(str, _represent_str)
+yaml.Dumper.increase_indent = _increase_indent
+
 # Configs
-POOR_PROMPT_ID = 'wallbergmorais/bug_to_user_story_v1'
+POOR_PROMPT_ID = 'wallbergmorais/bug_to_user_story_v2'
 PROMPT_PATH = f"{Path(__file__).parent.parent}/prompts/bug_to_user_story_v2.yml"
 REQUIRED_ENV_VARS = ['LANGSMITH_API_KEY', 'USERNAME_LANGSMITH_HUB', 'OPENAI_API_KEY', 'LLM_PROVIDER', 'LLM_MODEL', 'EVAL_MODEL']
 
