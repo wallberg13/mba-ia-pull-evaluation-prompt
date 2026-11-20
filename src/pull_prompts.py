@@ -73,8 +73,8 @@ yaml.add_representer(str, _represent_str)
 yaml.Dumper.increase_indent = _increase_indent
 
 # Configs
-POOR_PROMPT_ID = 'wallbergmorais/bug_to_user_story_v2'
-PROMPT_PATH = f"{Path(__file__).parent.parent}/prompts/bug_to_user_story_v2.yml"
+POOR_PROMPT_ID = 'wallbergmorais/bug_to_user_story_v1'
+PROMPT_PATH = f"{Path(__file__).parent.parent}/prompts/bug_to_user_story_v1.yml"
 REQUIRED_ENV_VARS = ['LANGSMITH_API_KEY', 'USERNAME_LANGSMITH_HUB', 'OPENAI_API_KEY', 'LLM_PROVIDER', 'LLM_MODEL', 'EVAL_MODEL']
 
 # Check .envs
